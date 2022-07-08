@@ -1,23 +1,36 @@
-import logo from './logo.svg';
+import axios from 'axios';
+import { Route, Routes } from 'react-router-dom';
 import './App.css';
+import useAsync from './customHook/useAsync';
+import CreateCustomer from './components/CreateCustomer';
+import CustomerList from './components/CustomerList';
+import DetailCustomer from './components/DetailCustomer';
+import Footer from './components/Footer';
+import Header from './components/Header';
+import { useState , useEffect } from "react";
+
+async function getCustomer(){
+const customers = await axios.get(`http://localhost:3001/customers`)
+  return customers.data;
+}
 
 function App() {
-  return (
+
+  const [state, refetch] = useAsync(getCustomer,[])
+  const { loading, data, error} = state;
+  if(loading) return <div>로딩중......</div>
+  if(error) return console.log(error)
+  if(!data) return <div>로딩중입니다.</div>
+  if(!state) return null;
+  return ( 
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <Header/>
+      <Routes>
+        <Route path="/" element={<CustomerList customers={data}/>}/>
+        <Route path="/detailview/:id" element={<DetailCustomer/>} />
+        <Route path="/write" element={<CreateCustomer/>} />
+      </Routes>
+      <Footer/>
     </div>
   );
 }
